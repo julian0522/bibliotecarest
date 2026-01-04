@@ -51,7 +51,7 @@ public class GlobalExceptionHandler {
 
         ApiError error = new ApiError(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                "Error interno del servidor",
+                ex.getMessage(),
                 request.getRequestURI());
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
