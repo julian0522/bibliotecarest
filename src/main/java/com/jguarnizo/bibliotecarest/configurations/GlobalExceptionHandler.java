@@ -3,6 +3,8 @@ package com.jguarnizo.bibliotecarest.configurations;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -18,54 +20,74 @@ import jakarta.servlet.http.HttpServletRequest;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(BookNotFoundException.class)
-    public ResponseEntity<ApiError> handleBookNotFound(
-            BookNotFoundException ex,
-            HttpServletRequest request) {
+        private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-        ApiError error = new ApiError(
-                HttpStatus.NOT_FOUND.value(),
-                ex.getMessage(),
-                request.getRequestURI());
+        @ExceptionHandler(BookNotFoundException.class)
+        public ResponseEntity<ApiError> handleBookNotFound(
+                        BookNotFoundException ex,
+                        HttpServletRequest request) {
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
-    }
+                ApiError error = new ApiError(
+                                HttpStatus.NOT_FOUND.value(),
+                                ex.getMessage(),
+                                request.getRequestURI());
 
-    @ExceptionHandler(BookExistException.class)
-    public ResponseEntity<ApiError> handleBookExist(
-            BookExistException ex,
-            HttpServletRequest request) {
+                logger.warn(
+                                "Libro no encontrado | URI: {} | Message: {}",
+                                request.getRequestURI(),
+                                ex.getMessage());
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+        }
 
-        ApiError error = new ApiError(
-                HttpStatus.BAD_REQUEST.value(),
-                ex.getMessage(),
-                request.getRequestURI());
+        @ExceptionHandler(BookExistException.class)
+        public ResponseEntity<ApiError> handleBookExist(
+                        BookExistException ex,
+                        HttpServletRequest request) {
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
-    }
+                ApiError error = new ApiError(
+                                HttpStatus.BAD_REQUEST.value(),
+                                ex.getMessage(),
+                                request.getRequestURI());
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiError> handleGenericException(
-            Exception ex,
-            HttpServletRequest request) {
+                logger.warn(
+                                "Libro ya existe | URI: {} | Message: {}",
+                                request.getRequestURI(),
+                                ex.getMessage());
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        }
 
-        ApiError error = new ApiError(
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                ex.getMessage(),
-                request.getRequestURI());
+        @ExceptionHandler(Exception.class)
+        public ResponseEntity<ApiError> handleGenericException(
+                        Exception ex,
+                        HttpServletRequest request) {
 
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
-    }
+                ApiError error = new ApiError(
+                                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                                ex.getMessage(),
+                                request.getRequestURI());
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleValidationErrors(
-            MethodArgumentNotValidException ex) {
+                logger.error(
+                                "Unhandled exception | URI: {} | Method: {}",
+                                request.getRequestURI(),
+                                request.getMethod(),
+                                ex);
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
 
-        Map<String, String> errors = new HashMap<>();
+        @ExceptionHandler(MethodArgumentNotValidException.class)
+        public ResponseEntity<Map<String, String>> handleValidationErrors(
+                        MethodArgumentNotValidException ex,
+                        HttpServletRequest request) {
 
-        ex.getBindingResult().getFieldErrors()
-                .forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
+                Map<String, String> errors = new HashMap<>();
 
-        return ResponseEntity.badRequest().body(errors);
-    }
+                ex.getBindingResult().getFieldErrors()
+                                .forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
+
+                logger.warn(
+                                "Validation failed | URI: {} | Errors: {}",
+                                request.getRequestURI(),
+                                errors);
+                return ResponseEntity.badRequest().body(errors);
+        }
 }
