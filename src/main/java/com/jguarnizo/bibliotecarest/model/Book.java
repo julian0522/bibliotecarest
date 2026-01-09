@@ -1,5 +1,8 @@
 package com.jguarnizo.bibliotecarest.model;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(name = "Book", description = "Modelo que representa un libro")
 public class Book {
     
     private Long id;

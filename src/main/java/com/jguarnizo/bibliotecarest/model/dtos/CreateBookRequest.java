@@ -3,6 +3,7 @@ package com.jguarnizo.bibliotecarest.model.dtos;
 import com.jguarnizo.bibliotecarest.model.Estate;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -12,16 +13,16 @@ import jakarta.validation.constraints.Size;
 @Schema(description = "Representa un Libro")
 public class CreateBookRequest {
 
-    @Schema(description = "Titulo del Libro", example = "Cien Años de Soledad")
+    @Schema(description = "Titulo del Libro", example = "Cien Años de Soledad", requiredMode = RequiredMode.REQUIRED)
     @NotBlank
     @Size(min = 1, max = 100, message = "El campo ''")
     private String title;
 
-    @Schema(description = "Nombre del Autor", example = "Gabriel Garcia Marquez")
+    @Schema(description = "Nombre del Autor", example = "Gabriel Garcia Marquez", requiredMode = RequiredMode.REQUIRED)
     @NotBlank
     private String author;
 
-    @Schema(description = "Identificador único de libro", example = "978-0-306-40615-7")
+    @Schema(description = "Identificador único de libro", example = "978-0-306-40615-7", requiredMode = RequiredMode.REQUIRED)
     @NotBlank
     private String isbn;
 
