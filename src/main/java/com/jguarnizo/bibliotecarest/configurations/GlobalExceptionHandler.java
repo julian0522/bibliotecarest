@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import com.jguarnizo.bibliotecarest.exceptions.BookExistException;
 import com.jguarnizo.bibliotecarest.exceptions.BookNotFoundException;
 import com.jguarnizo.bibliotecarest.model.dtos.ApiError;
+import com.jguarnizo.bibliotecarest.model.dtos.ValidationErrorResponse;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -75,7 +76,7 @@ public class GlobalExceptionHandler {
         }
 
         @ExceptionHandler(MethodArgumentNotValidException.class)
-        public ResponseEntity<Map<String, String>> handleValidationErrors(
+        public ResponseEntity<ValidationErrorResponse> handleValidationErrors(
                         MethodArgumentNotValidException ex,
                         HttpServletRequest request) {
 
@@ -84,10 +85,16 @@ public class GlobalExceptionHandler {
                 ex.getBindingResult().getFieldErrors()
                                 .forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
 
+                ValidationErrorResponse errorResponse = new ValidationErrorResponse(
+                        HttpStatus.BAD_REQUEST.value(), 
+                        "Error de validación", 
+                        request.getRequestURI(), 
+                        errors);
+
                 logger.warn(
                                 "Validation failed | URI: {} | Errors: {}",
                                 request.getRequestURI(),
                                 errors);
-                return ResponseEntity.badRequest().body(errors);
+                return ResponseEntity.badRequest().body(errorResponse);
         }
 }
